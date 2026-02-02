@@ -26,6 +26,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from ultralytics import YOLO
+from pythonosc.udp_client import SimpleUDPClient
 
 
 # -----------------------------
@@ -169,6 +170,18 @@ def iou_xyxy(a, b) -> float:
     return float(inter / union)
 
 
+# ---- OSC setup ----
+OSC_IP = "127.0.0.1"   # Max running on same machine
+OSC_PORT = 7400        # Must match Max
+osc_client = SimpleUDPClient(OSC_IP, OSC_PORT)
+
+# Only trigger when confident enough
+ACTION_CONF_THRESH = 0.3
+
+# Optional: prevent retrigger spam
+LAST_SENT = {}   # tid -> label
+
+
 # -----------------------------
 # Main
 # -----------------------------
@@ -302,6 +315,20 @@ def main():
                     conf, idx = torch.max(probs, dim=0)
                 t["label"] = idx_to_label.get(int(idx.item()), f"class_{int(idx.item())}")
                 t["conf"] = float(conf.item())
+
+                label = t["label"]
+                confidence = t["conf"]
+
+                # Trigger only if confident and label changed
+                if confidence >= ACTION_CONF_THRESH:
+                    last = LAST_SENT.get(tid)
+                    if last != label:
+                        osc_client.send_message(
+                            "/action",
+                            [int(tid), label, float(confidence)]
+                        )
+                        LAST_SENT[tid] = label
+
             last_infer_ms = (time.time() - t0) * 1000.0
 
         # ---- Draw ----
