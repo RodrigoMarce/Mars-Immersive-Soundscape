@@ -144,34 +144,36 @@ def classify_from_history(hist, fps_est):
     core_energy = float(np.median(hip_s))
     total_energy = 0.45 * arms_energy + 0.45 * legs_energy + 0.10 * core_energy
 
-    # Rhythm/variability: dancing tends to have high total energy + higher variance
-    total_var = float(np.var(ankle_s) + np.var(lw_s + rw_s))
+    return total_energy
 
-    # Idle threshold (tune)
-    if total_energy < 1.2:
-        return "idle"
+    # # Rhythm/variability: dancing tends to have high total energy + higher variance
+    # total_var = float(np.var(ankle_s) + np.var(lw_s + rw_s))
 
-    # Jumping: strong vertical ankle speed spikes
-    if np.percentile(vy, 85) > 6.0 and legs_energy > 2.0:
-        return "jumping"
+    # # Idle threshold (tune)
+    # if total_energy < 1.0:
+    #     return "idle"
 
-    # Running vs walking (cadence proxy): ankle speed magnitude
-    # (These thresholds are heuristic; you will likely tune them.)
-    if legs_energy > 4.0 and core_energy > 1.5:
-        return "running"
-    if legs_energy > 2.0 and core_energy > 1.0:
-        return "walking"
+    # # Jumping: strong vertical ankle speed spikes
+    # if np.percentile(vy, 90) > 1.0 and legs_energy > 2.0:
+    #     return "jumping"
 
-    # Arms moving (without strong leg motion)
-    if arms_energy > 3.0 and legs_energy < 2.0:
-        return "arms_moving"
+    # # Running vs walking (cadence proxy): ankle speed magnitude
+    # # (These thresholds are heuristic; you will likely tune them.)
+    # if legs_energy > 4.0 and core_energy > 1.5:
+    #     return "running"
+    # if legs_energy > 1.0 and core_energy > 0.5:
+    #     return "walking"
 
-    # Dancing: high total motion + variability across body
-    if total_energy > 2.5 and total_var > 6.0:
-        return "dancing"
+    # # Arms moving (without strong leg motion)
+    # if arms_energy > 2.0 and legs_energy < 1.0:
+    #     return "arms_moving"
 
-    # Fallback for “motion actions”
-    return "moving"
+    # # Dancing: high total motion + variability across body
+    # if total_energy > 2.5 and total_var > 4.0:
+    #     return "dancing"
+
+    # # Fallback for “motion actions”
+    # return "moving"
 
 
 # -----------------------------
@@ -208,7 +210,7 @@ def main():
     MAX_POSE_PEOPLE = 6             # only run pose on top-K biggest boxes (raise/lower as needed)
     BOX_EXPAND = 1.7                # include context for better motion cues
 
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
     if not cap.isOpened():
         raise RuntimeError("Could not open webcam (index 0).")
 
