@@ -233,10 +233,18 @@ def main():
                                 cv2.FONT_HERSHEY_SIMPLEX,
                                 1, (0, 255, 0), 2)
 
-        cv2.putText(frame, f"FPS: {fps_est:.1f}",
-                    (20, 40),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    1.0, (0, 255, 255), 2)
+        people_count = len(tracks)
+
+        cv2.putText(
+            frame,
+            f"FPS: {fps_est:.1f}   People: {people_count}",
+            (20, 40),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1.0,
+            (0, 255, 255),
+            2
+        )
+
 
         cv2.imshow("Pose Energy Tracker", frame)
 
