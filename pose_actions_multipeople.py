@@ -61,7 +61,7 @@ def energy_to_level(e):
     elif e < 0.7:
         return "moderate"
     else:
-        return "go crazy"
+        return "high"
 
 
 # ------------------ Energy ------------------
@@ -136,7 +136,7 @@ def main():
         fps = 0.9 * fps + 0.1 * (1.0 / max(dt, 1e-6))
 
         # Detect
-        det = detector(frame)[0]
+        det = detector(frame, verbose=False)[0] # on for debugging
         detections = []
 
         for box, cls in zip(det.boxes.xyxy.cpu().numpy(),
@@ -232,10 +232,10 @@ def main():
 
             if tid not in person_energy_state:
                 person_energy_state[tid] = level
-                osc.send_message("/energy/init", [tid, level])
+                osc.send_message("/energy", [tid, level])
             else:
                 if level != person_energy_state[tid]:
-                    osc.send_message("/energy/change", [tid, level])
+                    osc.send_message("/energy", [tid, level])
                     person_energy_state[tid] = level
 
             cv2.rectangle(frame,
