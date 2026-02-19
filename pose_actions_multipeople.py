@@ -97,7 +97,7 @@ def main():
 
         # If people count changes, send OSC and print everyone's energy levels
         if people_count != prev_people_count:
-            osc.send_people(people_count)
+            osc.send_people(3 if people_count % 3 == 0 else people_count % 3)  # Send 0 if no people, otherwise mod by 3
             # Print energy level list (strings) for everyone currently known
             energy_list = [v["level"] for v in person_energy_state.values()]
             print("People changed — energy levels:", energy_list)
@@ -140,11 +140,11 @@ def main():
 
             if tid not in person_energy_state:
                 person_energy_state[tid] = {"level": level, "value": norm}
-                osc.send_energy(tid, level)
+                # osc.send_energy(tid, level)   don't send individual energy level
             else:
                 prev_level = person_energy_state[tid]["level"]
-                if level != prev_level:
-                    osc.send_energy(tid, level)
+                # if level != prev_level:
+                #     osc.send_energy(tid, level) 
                 # Always update stored value
                 person_energy_state[tid] = {"level": level, "value": norm}
 
@@ -166,12 +166,12 @@ def main():
         # Send OSC when avg/max change by more than 0.1
         if avg is not None:
             if last_sent_avg is None or abs(avg - last_sent_avg) > 0.1:
-                osc.send_group_avg(avg)
+                osc.send_group_avg(avg * 400 - 200)
                 last_sent_avg = avg
 
         if mx is not None:
             if last_sent_max is None or abs(mx - last_sent_max) > 0.1:
-                osc.send_group_max(mx)
+                osc.send_group_max(mx * 26) 
                 last_sent_max = mx
 
         # Send std every 1 second
