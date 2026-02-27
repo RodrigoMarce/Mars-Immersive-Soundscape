@@ -56,6 +56,10 @@ def main():
     prev_people_count = -1
     # person_energy_state maps tid -> { "level": str, "value": float }
     person_energy_state = {}
+    
+    # Buffer to debounce people count changes
+    STABILITY_FRAMES = 23  # Require 10 consecutive frames with same count to confirm change
+    people_count_history = deque(maxlen=STABILITY_FRAMES)
 
     # last sent values for group stats (floats)
     last_sent_avg = None
@@ -95,13 +99,18 @@ def main():
 
         people_count = len(tracks)
 
-        # If people count changes, send OSC and print everyone's energy levels
-        if people_count != prev_people_count:
-            osc.send_people(3 if people_count % 3 == 0 else people_count % 3)  # Send 0 if no people, otherwise mod by 3
-            # Print energy level list (strings) for everyone currently known
-            energy_list = [v["level"] for v in person_energy_state.values()]
-            print("People changed — energy levels:", energy_list)
-            prev_people_count = people_count
+        # Add to history and check if count is stable
+        people_count_history.append(people_count)
+        
+        # Only send change signal if buffer is full and all values match (stable count)
+        if len(people_count_history) == STABILITY_FRAMES:
+            stable_count = people_count_history[0]
+            if all(c == stable_count for c in people_count_history) and stable_count != prev_people_count:
+                osc.send_people(3 if stable_count % 3 == 0 else stable_count % 3)
+                # Print energy level list (strings) for everyone currently known
+                energy_list = [v["level"] for v in person_energy_state.values()]
+                print(f"People changed to {stable_count} — energy levels: {energy_list}")
+                prev_people_count = stable_count
 
         # Per-person pose + energy
         for tid, t in tracks.items():
@@ -199,7 +208,7 @@ def main():
             (20, 40),
             cv2.FONT_HERSHEY_SIMPLEX,
             1.0,
-            (0, 255, 255),
+            (0, 0, 0),
             2,
         )
 
