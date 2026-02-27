@@ -58,7 +58,7 @@ def main():
     person_energy_state = {}
     
     # Buffer to debounce people count changes
-    STABILITY_FRAMES = 23  # Require 10 consecutive frames with same count to confirm change
+    STABILITY_FRAMES = 23  # Require 23 consecutive frames with same count to confirm change
     people_count_history = deque(maxlen=STABILITY_FRAMES)
 
     # last sent values for group stats (floats)
