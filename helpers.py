@@ -80,10 +80,10 @@ def compute_energy(hist, fps):
 def compute_group_stats(values):
     """Compute avg, min, max, stddev for a list of numeric energy values.
 
-    Returns (avg, mn, mx, std). If `values` is empty, returns (None, None, None, None).
+    Returns (avg, mn, mx, std). If `values` is empty, returns zeros (0.0, 0.0, 0.0, 0.0).
     """
     if not values:
-        return None, None, None, None
+        return 0.0, 0.0, 0.0, 0.0
     vals = np.array(values, dtype=float)
     avg = float(np.mean(vals))
     mn = float(np.min(vals))
