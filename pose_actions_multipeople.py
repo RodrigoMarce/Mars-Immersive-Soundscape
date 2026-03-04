@@ -106,7 +106,7 @@ def main():
         if len(people_count_history) == STABILITY_FRAMES:
             stable_count = people_count_history[0]
             if all(c == stable_count for c in people_count_history) and stable_count != prev_people_count:
-                osc.send_people(3 if stable_count % 3 == 0 else stable_count % 3)
+                osc.send_people(4 if stable_count % 4 == 0 else stable_count % 4)
                 # Print energy level list (strings) for everyone currently known
                 energy_list = [v["level"] for v in person_energy_state.values()]
                 print(f"People changed to {stable_count} — energy levels: {energy_list}")
